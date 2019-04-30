@@ -11,7 +11,6 @@
 # Load library and functions
 library(DJL)
 source("dm.dynamic.et.R")
-source("dm.dynamic.ll.R")
 
 # Load data
 df.f.bg <- read.csv(url("http://bit.ly/Budget4Fire"), header = T)
@@ -31,15 +30,14 @@ rts  <- "vrs"
 #########################################################################################################################
 
 # Experimental data
-df.e.io <- array(c(2, 4, 8, 4, 1, 2, 2, 2, 3, 6, 12, 6,
-                 5, 4, 3, 8, 1, 1, 1, 1, 5, 4,  3, 8),
-               c(4, 3, 2), 
-               dimnames = list(LETTERS[1:4], c("X", "Y", "z"), c("t1", "t2")))
-df.e.zt <- array(c(1, 2, 3, 10), c(4, 1), dimnames = list(LETTERS[1:4], c("Z^T")))
-df.e.bg <- array(apply(df.e.io[,3,], 1, sum) + df.e.zt, c(4, 1), dimnames = list(LETTERS[1:4], c("Z^0")))
+df.e.io  <- array(c(2, 4, 8, 4, 1, 2, 2, 2, 3, 6, 12, 6,
+                  5, 4, 3, 8, 1, 1, 1, 1, 5, 4,  3, 8),
+                c(4, 3, 2), 
+                dimnames = list(LETTERS[1:4], c("X", "Y", "z"), c("t1", "t2")))
+df.e.Z.T <- array(c(1, 2, 3, 10), c(4, 1), dimnames = list(LETTERS[1:4], c("Z^T")))
 
 # Run
-res.e.et <- dm.dynamic.et(df.e.io[,1,], df.e.io[,2,], df.e.io[,3,], df.e.zt)
+res.e.et <- dm.dynamic.et(df.e.io[,1,], df.e.io[,2,], df.e.io[,3,], df.e.Z.T)
 data.frame(Sys.Eff = res.e.et$eff.s, T.Eff = res.e.et$eff.t, Lambda = res.e.et$lambda)
 
 
@@ -61,11 +59,11 @@ noquote(format(round(t(table.1), 2), big.mark = ","))
 
 # Table 2. Comparative results of efficiency
 res.f.et <- dm.dynamic.et(df.f.3d[, id.x, ], df.f.3d[, id.y, ], df.f.3d[, id.z, ], df.f.bg$Z.T, rts)
-res.f.ll <- dm.dynamic.ll(df.f.3d[, id.x, ], df.f.3d[, id.y, ], df.f.3d[, id.z, ], df.f.bg$Z.0, rts)
-table.2  <- matrix(c(res.f.et$eff.s, res.f.ll$eff.s, res.f.et$eff.t, res.f.ll$eff.t), nrow(df.f.bg), 
+res.f.bc <- dm.dynamic.bc(df.f.3d[, id.x, ], df.f.3d[, id.y, ], df.f.3d[, id.z, ], df.f.bg$Z.0, rts)
+table.2  <- matrix(c(res.f.et$eff.s, res.f.bc$eff.s, res.f.et$eff.t, res.f.bc$eff.t), nrow(df.f.bg), 
                   dimnames = list(df.f.bg$DMU, 
-                                  c("et.eff.s", "ll.eff.s", paste0("et.", 2012:2016), paste0("ll.", 2012:2016))))
-print(table.2[, c(1, 2, 3, 8, 4, 9, 5, 10, 6, 11, 7, 12)])
+                                  c("ET.Eff.sys", "LL.Eff.sys", paste0("ET.", 2012:2016), paste0("LL.", 2012:2016))))
+print(round(table.2[, c(1, 2, 3, 8, 4, 9, 5, 10, 6, 11, 7, 12)], 4))
 
 # How many system efficient DMUs?
 apply(table.2[, 1:2], 2, function(x) sum(round(x, 8) == 1))

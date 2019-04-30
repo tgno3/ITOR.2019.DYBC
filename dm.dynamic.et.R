@@ -113,7 +113,7 @@ dm.dynamic.et <- function(xdata, ydata, zdata, finalz, rts = "crs", orientation 
     
     # Stage II
     # Link previous solutions
-    add.constraint(lp.it, rep(1, t), indices = c(p.eff:(p.xsl - 1)), "=", results.efficiency.t[j])
+    for(k in 1:t){add.constraint(lp.it, c(1), indices = c(p.eff + k - 1), "=", results.efficiency.t[j, k])}
     
     # Slack sum max
     set.objfn(lp.it, c(rep(-1, (p.end - p.xsl))), indices = c(p.xsl:(p.end - 1)))
@@ -122,23 +122,23 @@ dm.dynamic.et <- function(xdata, ydata, zdata, finalz, rts = "crs", orientation 
     solve.lpExtPtr(lp.it)
     
     # Get results
-    temp.s                <- get.variables(lp.it)
-    results.lambda[j, ]   <- temp.s[1:n]
-    results.xslack[j, , ] <- array(temp.s[p.xsl:(p.zsl - 1)], c(m, t))
-    results.zslack[j, , ] <- array(temp.s[p.zsl:(p.ysl - 1)], c(b, t))
-    results.yslack[j, , ] <- array(temp.s[p.ysl:(p.isl - 1)], c(s, t))
-    results.islack[j, , ] <- array(temp.s[p.isl:(p.fsl - 1)], c(b, t))
-    results.fslack[j, , ] <- array(temp.s[p.fsl:(p.end - 1)], c(b, t))
+    temp.s              <- get.variables(lp.it)
+    results.lambda[j, ] <- temp.s[1:n]
+    results.xslack[j,,] <- array(temp.s[p.xsl:(p.zsl - 1)], c(m, t))
+    results.zslack[j,,] <- array(temp.s[p.zsl:(p.ysl - 1)], c(b, t))
+    results.yslack[j,,] <- array(temp.s[p.ysl:(p.isl - 1)], c(s, t))
+    results.islack[j,,] <- array(temp.s[p.isl:(p.fsl - 1)], c(b, t))
+    results.fslack[j,,] <- array(temp.s[p.fsl:(p.end - 1)], c(b, t))
   }
   
   # Store results
-  results <- list(eff.s   = results.efficiency.s, 
-                  eff.t   = results.efficiency.t, 
-                  lambda  = results.lambda, 
-                  xslack  = results.xslack, 
-                  yslack  = results.yslack, 
-                  zslack  = results.zslack, 
-                  islack  = results.islack, 
-                  fslack  = results.fslack)
+  results <- list(eff.s  = results.efficiency.s, 
+                  eff.t  = results.efficiency.t, 
+                  lambda = results.lambda, 
+                  xslack = results.xslack, 
+                  yslack = results.yslack, 
+                  zslack = results.zslack, 
+                  islack = results.islack, 
+                  fslack = results.fslack)
   return(results)
 }
